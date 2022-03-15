@@ -8,19 +8,22 @@ import com.google.gson.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
 
 public class App {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
 
         String data = readJson();
         // it will put the element of json file in array list
-        Type quote = new TypeToken<ArrayList<QuotesReader>>() { }.getType();
+        Type quote = new TypeToken<ArrayList<QuotesReader>>() {
+        }.getType();
         // it will convert Json type format to Gson type  object
         List<QuotesReader> result = new Gson().fromJson(data, quote);
 
@@ -32,7 +35,20 @@ public class App {
                 + result.get(index));
 
 //          to print all Author name and text in list
-//          System.out.println(g);
+//          System.out.println(result);
+        System.out.println("******************************** LAP 9 *********************************");
+
+        Gson gson = new Gson();
+        try {
+            String online = readOnlineJson();
+            OnlineQuotesReader onlineQuotesReader = gson.fromJson(online, OnlineQuotesReader.class);
+            System.out.println(onlineQuotesReader);
+        } catch (Exception exception) {
+            String offline = offlineReadJson();
+            OnlineQuotesReader offlineQuotesReader = gson.fromJson(offline, OnlineQuotesReader.class);
+            System.out.println(offlineQuotesReader);
+
+        }
 
     }
 
@@ -41,6 +57,52 @@ public class App {
     public static String readJson() {
 
         File file = new File("recentquotes.json");
+        BufferedReader bufferedReader = null;
+        String line = null;
+        String message = new String();
+
+
+        {
+            try {
+                bufferedReader = new BufferedReader(new FileReader(file));
+
+                while ((line = bufferedReader.readLine()) != null) {
+                    message += line;
+
+
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+
+            }
+        }
+        return message;
+    }
+
+    public static String readOnlineJson() throws IOException {
+        URL url = new URL("http://api.forismatic.com/api/1.0/?method=getQuote&format=json&lang=en");
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        con.setRequestMethod("GET");
+        InputStreamReader inputStreamReader = new InputStreamReader(con.getInputStream());
+        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        String data = bufferedReader.readLine();
+//        System.out.println(data);
+        Gson gson = new Gson();
+        OnlineQuotesReader onlineQuotesReader = gson.fromJson(data, OnlineQuotesReader.class);
+        File onlineQuotesReaderFile = new File("./OnlineQuoute.json");
+        try (FileWriter onlineQuotesReaderFileWrite = new FileWriter(onlineQuotesReaderFile)) {
+            gson.toJson(onlineQuotesReader, onlineQuotesReaderFileWrite);
+            bufferedReader.readLine();
+
+        }
+
+        return data;
+    }
+
+    public static String offlineReadJson() {
+
+        File file = new File("OnlineQuoute.json");
         BufferedReader bufferedReader = null;
         String line = null;
         String message = new String();

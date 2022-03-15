@@ -10,6 +10,18 @@ public class QuotesReader {
     String likes;
     String text;
 
+    public QuotesReader(ArrayList<String> tags, String author, String likes, String text) {
+        this(author,likes);
+        this.tags = tags;
+        this.author = author;
+        this.likes = likes;
+        this.text = text;
+    }
+
+    public QuotesReader(String author, String likes) {
+        this.author = author;
+        this.likes = likes;
+    }
 
     public QuotesReader( ) {
 
